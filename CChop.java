@@ -33,9 +33,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
-import org.rsbot.event.events.MessageEvent;
-import org.rsbot.event.listeners.MessageListener;
+import org.rsbot.event.events.ServerMessageEvent;
 import org.rsbot.event.listeners.PaintListener;
+import org.rsbot.event.listeners.ServerMessageListener;
 import org.rsbot.script.Script;
 import org.rsbot.script.ScriptManifest;
 import org.rsbot.script.methods.Game;
@@ -75,8 +75,9 @@ import org.rsbot.script.wrappers.RSTile;
  * South Falador tree bug v1.26 - fixed more problems due to updates v1.261 -
  * Fixed Rimmington
  */
-public class CChop extends Script implements PaintListener, MessageListener,
-		MouseListener {
+@SuppressWarnings("deprecation")
+public class CChop extends Script implements PaintListener,
+		ServerMessageListener, MouseListener {
 
 	private boolean guiWait = true;
 	private boolean guiExit = true;
@@ -130,12 +131,12 @@ public class CChop extends Script implements PaintListener, MessageListener,
 	private int safety = 0;
 	private String status;
 	private Point p;
-	private final String version = "v1.261";
+	private String version = "v1.261";
 	private String currentVersion = "";
 	private String treeType = ".";
 	private int treeID;
-	private final ArrayList<Integer> ivyIDs = new ArrayList<Integer>();
-	private final ArrayList<Integer> stumpIDs = new ArrayList<Integer>();
+	private ArrayList<Integer> ivyIDs = new ArrayList<Integer>();
+	private ArrayList<Integer> stumpIDs = new ArrayList<Integer>();
 	private int stumpID;
 	private RSTile bankLocation;
 	private String chopType;
@@ -147,7 +148,6 @@ public class CChop extends Script implements PaintListener, MessageListener,
 	private final Image img4 = getImage("http://i263.photobucket.com/albums/ii158/zpogo/EXPback-1copy.png");
 	private Color mouseColor = new Color(51, 153, 0, 255);
 
-	@Override
 	public boolean onStart() {
 		if (checkCurrentVersion())
 			log(Color.BLUE, "You have the latest version! :)");
@@ -221,7 +221,6 @@ public class CChop extends Script implements PaintListener, MessageListener,
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public void setUp() {
 		status = "Starting up.";
 		command = location + " - " + chopType;
@@ -1422,7 +1421,7 @@ public class CChop extends Script implements PaintListener, MessageListener,
 		int x2 = tile2.getX();
 		int y2 = tile2.getY();
 
-		return new RSTile((x1 + x2) / 2, (y1 + y2) / 2);
+		return new RSTile((int) (x1 + x2) / 2, (int) (y1 + y2) / 2);
 	}
 
 	public void moveToNextTree() {
@@ -1516,7 +1515,6 @@ public class CChop extends Script implements PaintListener, MessageListener,
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public void moveToNextTreeLong() {
 		RSTile[] trees = { tree1, tree2, tree3, tree4, tree5, tree6, tree7 };
 		long start = System.currentTimeMillis();
@@ -2209,7 +2207,6 @@ public class CChop extends Script implements PaintListener, MessageListener,
 		return t1.getX() == t2.getX() && t1.getY() == t2.getY();
 	}
 
-	@SuppressWarnings("deprecation")
 	public int walkPath(RSTile[] path) {
 		// if(playerIsNear(path[path.length-2],5))
 		// walking.walkTileMM(path[path.length-1],1,1);
@@ -2426,8 +2423,7 @@ public class CChop extends Script implements PaintListener, MessageListener,
 		sleep(random(600, 800));
 	}
 
-	@Override
-	public void messageReceived(final MessageEvent a) {
+	public void serverMessageRecieved(final ServerMessageEvent a) {
 		final String serverString = a.getMessage();
 		if (serverString.toLowerCase().contains("you get some yew logs"))
 			yewsCut++;
@@ -2512,25 +2508,20 @@ public class CChop extends Script implements PaintListener, MessageListener,
 		}
 	}
 
-	@Override
 	public void mouseExited(MouseEvent e) {
 	}
 
-	@Override
 	public void mouseEntered(MouseEvent e) {
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent e) {
 		mouseColor = new Color(51, 153, 0, 255);
 	}
 
-	@Override
 	public void mousePressed(MouseEvent e) {
 		mouseColor = new Color(255, 0, 0, 100);
 	}
 
-	@Override
 	public void mouseClicked(MouseEvent e) {
 		p = e.getPoint();
 		if (showPaint && p.getX() > 447 && p.getX() < 513 && p.getY() > 458
@@ -2673,7 +2664,6 @@ public class CChop extends Script implements PaintListener, MessageListener,
 	}
 
 	// LOOP====================================================================================================================
-	@Override
 	public int loop() {
 		try {
 			if (safety < 1) {
@@ -2786,7 +2776,7 @@ public class CChop extends Script implements PaintListener, MessageListener,
 					while (!playerIsNear(trees[nextTree - 1], 4))
 						moveToNextTree();
 					if (!chopType.equals("ivy"))
-						camera.turnTo(trees[nextTree - 1]);
+						camera.turnToTile(trees[nextTree - 1]);
 					camera.setPitch(random(20, 50));
 				}
 				if (safety < 5)
@@ -2867,7 +2857,6 @@ public class CChop extends Script implements PaintListener, MessageListener,
 
 	}
 
-	@Override
 	public void onRepaint(Graphics g) {
 		if (game.isLoggedIn()) {
 			try {
@@ -3100,4 +3089,573 @@ public class CChop extends Script implements PaintListener, MessageListener,
 							g.drawString((int) (tree3TimeDead / 1000) + "s",
 									(int) stump3.getX(), (int) stump3.getY());
 						if (!tree4Status && tree4DeadTime != 0)
-							g.drawString((int) (tree4TimeDead / 
+							g.drawString((int) (tree4TimeDead / 1000) + "s",
+									(int) stump4.getX(), (int) stump4.getY());
+						if (!tree5Status && tree5DeadTime != 0)
+							g.drawString((int) (tree5TimeDead / 1000) + "s",
+									(int) stump5.getX(), (int) stump5.getY());
+						if (!tree6Status && tree6DeadTime != 0)
+							g.drawString((int) (tree6TimeDead / 1000) + "s",
+									(int) stump6.getX(), (int) stump6.getY());
+						if (!tree7Status && tree7DeadTime != 0)
+							g.drawString((int) (tree7TimeDead / 1000) + "s",
+									(int) stump7.getX(), (int) stump7.getY());
+					} else {
+						g.setColor(new Color(51, 153, 0, 255));
+						g.fillRect(448, 459, (512 - 448), (472 - 459));
+						g.setColor(new Color(0, 0, 0, 255));
+						g.drawRect(448, 459, (512 - 448), (472 - 459));
+						g.drawString("Hide/Show", 450, 470);
+					}
+
+				} else {
+					if (showPaint) {
+						onRepaint2(g, false);
+						g.setColor(new Color(0, 0, 0, 205));
+						g.fillRoundRect(333, 160, 181, 179, 6, 6);
+						g.setColor(new Color(255, 0, 0, 255));
+						g.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
+						g.drawString("Conderoga's Chopper " + version, 338, 177);
+						g.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
+						g.drawString("Levels Gained: " + lvlsGained, 344, 192);
+						if (treeType.equals("yews"))
+							g.drawString("Yews Chopped: " + yewsCut, 344, 207);
+						else if (treeType.equals("magics"))
+							g.drawString("Magics Chopped: " + magicsCut, 344,
+									207);
+						else if (treeType.equals("ivy"))
+							g.drawString("Ivy Chopped: " + ivyCut, 344, 207);
+						else if (treeType.equals("willows"))
+							g.drawString("Willows Chopped: " + willowsCut, 344,
+									207);
+						else if (treeType.equals("maples"))
+							g.drawString("Maples Chopped: " + maplesCut, 344,
+									207);
+						else if (treeType.equals("oaks"))
+							g.drawString("Oaks Chopped: " + oaksCut, 344, 207);
+						g.drawString("Exp Gained: " + expGained, 344, 222);
+						g.drawString("Time Running: " + hours + ":" + minutes
+								+ ":" + seconds, 344, 237);
+
+						// Progress Bar
+
+						g.setColor(new Color(255, 0, 0, 255));
+						g.fillRoundRect(344, 241, 150, 20, 8, 8); // Bar
+																	// background
+						g.setColor(new Color(0, 255, 0, 255)); // GREEN
+						g.fillRoundRect(344, 241, (int) (skills
+								.getPercentToNextLevel(Skills
+										.getIndex("woodcutting")) * 1.5), 20,
+								8, 8);
+						g.setColor(new Color(255, 255, 255, 100));
+						g.drawString(
+								skills.getPercentToNextLevel(Skills
+										.getIndex("woodcutting"))
+										+ "% to: "
+										+ (skills.getCurrentLevel(Skills
+												.getIndex("woodcutting")) + 1)
+										+ " (" + expToLvl + " exp)", 348, 256);
+						g.fillRoundRect(345, 251, 148, 10, 8, 8);
+						g.setColor(new Color(0, 0, 0, 255));
+						g.drawString(
+								skills.getPercentToNextLevel(Skills
+										.getIndex("woodcutting"))
+										+ "% to: "
+										+ (skills.getCurrentLevel(Skills
+												.getIndex("woodcutting")) + 1)
+										+ " (" + expToLvl + " exp)", 347, 255);
+						g.setColor(new Color(255, 0, 0, 255));
+						if (ms2 != 0)
+							g.drawString("Exp/Hr: "
+									+ (int) (expGained / (ms2 / 3600000)), 344,
+									274);
+						g.drawString("Status: " + status, 344, 289);
+
+						if (treeType.equals("yews")) {
+							g.drawString("Money Gained: " + yewPrice * yewsCut,
+									344, 304);
+							if (ms2 != 0)
+								g.drawString(
+										"Money/Hr: "
+												+ (int) ((yewPrice * yewsCut) / (ms2 / 3600000)),
+										344, 319);
+						} else if (treeType.equals("magics")) {
+							g.drawString("Money Gained: " + magicPrice
+									* magicsCut, 344, 304);
+							if (ms2 != 0)
+								g.drawString(
+										"Money/Hr: "
+												+ (int) ((magicPrice * magicsCut) / (ms2 / 3600000)),
+										344, 319);
+						} else if (treeType.equals("ivy")) {
+							g.drawString("Nests Collected: " + nests, 344, 304);
+							if (ms2 != 0)
+								g.drawString("Nests/Hr: "
+										+ (int) (nests / (ms2 / 3600000)), 344,
+										319);
+						} else if (treeType.equals("willows")) {
+							g.drawString("Money Gained: " + willowPrice
+									* willowsCut, 344, 304);
+							if (ms2 != 0)
+								g.drawString(
+										"Money/Hr: "
+												+ (int) ((willowPrice * willowsCut) / (ms2 / 3600000)),
+										344, 319);
+						} else if (treeType.equals("maples")) {
+							g.drawString("Money Gained: " + maplePrice
+									* maplesCut, 344, 304);
+							if (ms2 != 0)
+								g.drawString(
+										"Money/Hr: "
+												+ (int) ((maplePrice * maplesCut) / (ms2 / 3600000)),
+										344, 319);
+						} else if (treeType.equals("oaks")) {
+							g.drawString("Money Gained: " + oakPrice * oaksCut,
+									344, 304);
+							if (ms2 != 0)
+								g.drawString(
+										"Money/Hr: "
+												+ (int) ((oakPrice * oaksCut) / (ms2 / 3600000)),
+										344, 319);
+						}
+						g.drawString("Est. Time to Lvl: " + time2LvlHrs + ":"
+								+ time2LvlMins + ":" + time2LvlSec, 344, 334);
+						// Mouse Stuff
+						Point tempPoint = mouse.getLocation();
+						int tempXCoordinate = (int) tempPoint.getX();
+						int tempYCoordinate = (int) tempPoint.getY();
+						g.setColor(new Color(0, 255, 0, 100));
+						g.drawLine(tempXCoordinate, 0, tempXCoordinate, 501);
+						g.drawLine(0, tempYCoordinate, 764, tempYCoordinate);
+						// Stump time drawing
+						g.setColor(Color.GREEN);
+						stump1 = calc.tileToScreen(tree1);
+						stump2 = calc.tileToScreen(tree2);
+						stump3 = calc.tileToScreen(tree3);
+						stump4 = calc.tileToScreen(tree4);
+						stump5 = calc.tileToScreen(tree5);
+						stump6 = calc.tileToScreen(tree6);
+						stump7 = calc.tileToScreen(tree7);
+						// ALIVE TREES
+						if (tree1Status && tree1AliveTime != 0)
+							g.drawString((int) (tree1TimeAlive / 1000) + "s",
+									(int) stump1.getX(), (int) stump1.getY());
+						if (tree2Status && tree2AliveTime != 0)
+							g.drawString((int) (tree2TimeAlive / 1000) + "s",
+									(int) stump2.getX(), (int) stump2.getY());
+						if (tree3Status && tree3AliveTime != 0)
+							g.drawString((int) (tree3TimeAlive / 1000) + "s",
+									(int) stump3.getX(), (int) stump3.getY());
+						if (tree4Status && tree4AliveTime != 0)
+							g.drawString((int) (tree4TimeAlive / 1000) + "s",
+									(int) stump4.getX(), (int) stump4.getY());
+						if (tree5Status && tree5AliveTime != 0)
+							g.drawString((int) (tree5TimeAlive / 1000) + "s",
+									(int) stump5.getX(), (int) stump5.getY());
+						if (tree6Status && tree6AliveTime != 0)
+							g.drawString((int) (tree6TimeAlive / 1000) + "s",
+									(int) stump6.getX(), (int) stump6.getY());
+						if (tree7Status && tree7AliveTime != 0)
+							g.drawString((int) (tree7TimeAlive / 1000) + "s",
+									(int) stump7.getX(), (int) stump7.getY());
+						// DEAD TREES
+						g.setColor(Color.MAGENTA);
+						if (!tree1Status && tree1DeadTime != 0)
+							g.drawString((int) (tree1TimeDead / 1000) + "s",
+									(int) stump1.getX(), (int) stump1.getY());
+						if (!tree2Status && tree2DeadTime != 0)
+							g.drawString((int) (tree2TimeDead / 1000) + "s",
+									(int) stump2.getX(), (int) stump2.getY());
+						if (!tree3Status && tree3DeadTime != 0)
+							g.drawString((int) (tree3TimeDead / 1000) + "s",
+									(int) stump3.getX(), (int) stump3.getY());
+						if (!tree4Status && tree4DeadTime != 0)
+							g.drawString((int) (tree4TimeDead / 1000) + "s",
+									(int) stump4.getX(), (int) stump4.getY());
+						if (!tree5Status && tree5DeadTime != 0)
+							g.drawString((int) (tree5TimeDead / 1000) + "s",
+									(int) stump5.getX(), (int) stump5.getY());
+						if (!tree6Status && tree6DeadTime != 0)
+							g.drawString((int) (tree6TimeDead / 1000) + "s",
+									(int) stump6.getX(), (int) stump6.getY());
+						if (!tree7Status && tree7DeadTime != 0)
+							g.drawString((int) (tree7TimeDead / 1000) + "s",
+									(int) stump7.getX(), (int) stump7.getY());
+
+					} else {
+						g.setColor(new Color(51, 153, 0, 255));
+						g.fillRect(448, 459, (512 - 448), (472 - 459));
+						g.setColor(new Color(0, 0, 0, 255));
+						g.drawRect(448, 459, (512 - 448), (472 - 459));
+						g.drawString("Hide/Show", 450, 470);
+					}
+				}
+			} catch (Exception e) {
+			}
+			;
+		}
+	}
+
+	private Image getImage(String url) {
+		try {
+			return ImageIO.read(new URL(url));
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public void onRepaint2(Graphics g1, boolean fancy) {
+		Graphics2D g = (Graphics2D) g1;
+		if (fancy) {
+			g.drawImage(img1, 342, 350, null);
+			g.drawImage(img2, 5, 6, null);
+			g.drawImage(img4, 5, 29, null);
+		}
+		g.setColor(new Color(51, 153, 0, 255));
+		g.fillRect(448, 459, (512 - 448), (472 - 459));
+		g.fillRect(398, 459, (448 - 398), (472 - 459));
+		g.setColor(new Color(0, 0, 0, 255));
+		g.drawRect(448, 459, (512 - 448), (472 - 459));
+		g.drawRect(398, 459, (448 - 398), (472 - 459));
+		g.drawString("Hide/Show", 450, 470);
+		if (fancy)
+			g.drawString("Simple", 405, 470);
+		else
+			g.drawString("Adv.", 415, 470);
+	}
+
+	public void onFinish() {
+		log("Exp gained: " + expGained);
+		log("Levels gained: " + lvlsGained);
+		log("Thanks for using Conderoga's Chopper!");
+	}
+
+	public void openURL(final String url) { // Credits ZombieKnight
+		// who gave credits to Dave who gave credits
+		// to
+		// some guy who made this.
+		final String osName = System.getProperty("os.name");
+		try {
+			if (osName.startsWith("Mac OS")) {
+				final Class<?> fileMgr = Class
+						.forName("com.apple.eio.FileManager");
+				final Method openURL = fileMgr.getDeclaredMethod("openURL",
+						new Class[] { String.class });
+				openURL.invoke(null, new Object[] { url });
+			} else if (osName.startsWith("Windows")) {
+				Runtime.getRuntime().exec(
+						"rundll32 url.dll,FileProtocolHandler " + url);
+			} else { // assume Unix or Linux
+				final String[] browsers = { "firefox", "opera", "konqueror",
+						"epiphany", "mozilla", "netscape" };
+				String browser = null;
+				for (int count = 0; count < browsers.length && browser == null; count++) {
+					if (Runtime.getRuntime()
+							.exec(new String[] { "which", browsers[count] })
+							.waitFor() == 0) {
+						browser = browsers[count];
+					}
+				}
+				if (browser == null) {
+					throw new Exception("Could not find web browser");
+				} else {
+					Runtime.getRuntime().exec(new String[] { browser, url });
+				}
+			}
+		} catch (final Exception e) {
+		}
+	}
+
+	public class CChopGUI extends JFrame {
+		private static final long serialVersionUID = 1L;
+
+		public CChopGUI() {
+			initComponents();
+		}
+
+		private void button4ActionPerformed(ActionEvent e) {
+			try {
+				guiWait = false;
+				guiExit = true;
+				dispose();
+			} catch (Exception ex) {
+				log("WTF?!?");
+			}
+			;
+		}
+
+		private void button2ActionPerformed(ActionEvent e) {
+			try {
+				location = comboBox2.getSelectedItem().toString();
+				takeBreaks = checkBox1.isSelected();
+				nearest = true;
+				guiExit = false;
+				guiWait = false;
+				dispose();
+			} catch (Exception ex) {
+				log("WTF?!?1");
+			}
+			;
+		}
+
+		private void button1ActionPerformed(ActionEvent e) {
+			try {
+				chopType = comboBox1.getSelectedItem().toString();
+				initializeStage2Components();
+			} catch (Exception ex) {
+				log("WTF?!?2");
+			}
+			;
+		}
+
+		/*
+		 * private void button3ActionPerformed(ActionEvent e) {
+		 * initComponents(); chopType = null; }
+		 */
+		private void initComponents() {
+			label1 = new JLabel();
+			label2 = new JLabel();
+			label3 = new JLabel();
+			button1 = new JButton();
+			comboBox1 = new JComboBox();
+			button4 = new JButton();
+
+			// ======== this ========
+			setAlwaysOnTop(true);
+			setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			setFont(new Font("Dialog", Font.PLAIN, 16));
+			setResizable(false);
+			setTitle("Conderoga's Chopper");
+			Container contentPane = getContentPane();
+			contentPane.setLayout(null);
+
+			// ---- label1 ----
+			label1.setText("Conderoga's Chopper Settings");
+			label1.setFont(new Font("Comic Sans MS", Font.PLAIN, 20));
+			contentPane.add(label1);
+			label1.setBounds(25, 15, 315, 39);
+
+			// ---- label2 ----
+			label2.setText("Version: " + version);
+			contentPane.add(label2);
+			label2.setBounds(new Rectangle(new Point(25, 50), label2
+					.getPreferredSize()));
+
+			// ---- label3 ----
+			label3.setText("Select what you wish to chop:");
+			label3.setFont(label3.getFont().deriveFont(
+					label3.getFont().getSize() + 2f));
+			contentPane.add(label3);
+			label3.setBounds(new Rectangle(new Point(10, 105), label3
+					.getPreferredSize()));
+
+			// ---- button1 ----
+			button1.setText("Confirm and Proceed");
+			button1.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					button1ActionPerformed(e);
+				}
+			});
+			contentPane.add(button1);
+			button1.setBounds(85, 145, 195, 35);
+
+			// ---- comboBox1 ----
+			comboBox1.setMaximumRowCount(6);
+			contentPane.add(comboBox1);
+			comboBox1.setModel(new DefaultComboBoxModel(new String[] {
+
+			"Yews", "Magics", "Ivy", "Willows", "Maples", "Oaks"
+
+			}));
+			comboBox1.setBounds(205, 100, 145, 25);
+
+			// ---- button4 ----
+			button4.setText("Exit");
+			button4.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					button4ActionPerformed(e);
+				}
+			});
+			contentPane.add(button4);
+			button4.setBounds(0, 325, 85, 38);
+
+			{ // compute preferred size
+				Dimension preferredSize = new Dimension();
+				for (int i = 0; i < contentPane.getComponentCount(); i++) {
+					Rectangle bounds = contentPane.getComponent(i).getBounds();
+					preferredSize.width = Math.max(bounds.x + bounds.width,
+							preferredSize.width);
+					preferredSize.height = Math.max(bounds.y + bounds.height,
+							preferredSize.height);
+				}
+				Insets insets = contentPane.getInsets();
+				preferredSize.width += insets.right;
+				preferredSize.height += insets.bottom;
+				contentPane.setMinimumSize(preferredSize);
+				contentPane.setPreferredSize(preferredSize);
+			}
+			pack();
+			setLocationRelativeTo(getOwner());
+
+		}
+
+		private void initializeStage2Components() {
+			checkBox1 = new JCheckBox("Take short breaks?", false);
+			// checkBox2 = new JCheckBox("Chop nearest?",true);
+			label4 = new JLabel();
+			comboBox2 = new JComboBox();
+			button2 = new JButton();
+			label1 = new JLabel();
+			label2 = new JLabel();
+			button4 = new JButton();
+
+			// ======== this ========
+			setAlwaysOnTop(true);
+			setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			setFont(new Font("Dialog", Font.PLAIN, 16));
+			setResizable(false);
+			setTitle("Conderoga's Chopper");
+			Container contentPane = getContentPane();
+			contentPane.setLayout(null);
+
+			// ---- label1 ----
+			label1.setText("Conderoga's Chopper Settings");
+			label1.setFont(new Font("Comic Sans MS", Font.PLAIN, 20));
+			contentPane.add(label1);
+			label1.setBounds(25, 15, 315, 39);
+
+			// ---- label2 ----
+			label2.setText("Version: " + version);
+			contentPane.add(label2);
+			label2.setBounds(new Rectangle(new Point(25, 50), label2
+					.getPreferredSize()));
+
+			// ---- label4 ----
+			label4.setText("Select where you wish to chop:");
+			label4.setFont(label4.getFont().deriveFont(
+					label4.getFont().getSize() + 2f));
+			contentPane.add(label4);
+			label4.setBounds(10, 210, 180, 16);
+
+			// ---- comboBox2 ----
+			if (chopType.equals("Yews")) {
+				comboBox2.setMaximumRowCount(8);
+				comboBox2.setModel(new DefaultComboBoxModel(new String[] {
+
+				"Grand Exchange", "Edgeville", "Rimmington", "Catherby",
+						"Seer's Village", "South Falador", "Draynor",
+						"Tree Gnome"
+
+				}));
+			} else if (chopType.equals("Magics")) {
+				comboBox2.setMaximumRowCount(3);
+				comboBox2.setModel(new DefaultComboBoxModel(new String[] {
+
+				"Seer's Village", "Sorcerer's Tower", "Mage Training Area"
+
+				}));
+			} else if (chopType.equals("Ivy")) {
+				comboBox2.setMaximumRowCount(8);
+				comboBox2.setModel(new DefaultComboBoxModel(new String[] {
+
+				"Castle Wars", "Grand Exchange", "Taverly", "Yanille",
+						"Varrock Palace", "Ardougne", "South Falador",
+						"North Falador"
+
+				}));
+			} else if (chopType.equals("Willows")) {
+				comboBox2.setMaximumRowCount(2);
+				comboBox2.setModel(new DefaultComboBoxModel(new String[] {
+
+				"Draynor", "Port Salim"
+
+				}));
+			} else if (chopType.equals("Maples")) {
+				comboBox2.setMaximumRowCount(1);
+				comboBox2.setModel(new DefaultComboBoxModel(new String[] {
+
+				"Seer's Village"
+
+				}));
+			} else if (chopType.equals("Oaks")) {
+				comboBox2.setMaximumRowCount(1);
+				comboBox2.setModel(new DefaultComboBoxModel(new String[] {
+
+				"Draynor"
+
+				}));
+			}
+			contentPane.add(comboBox2);
+			comboBox2.setBounds(205, 205, 145, 25);
+
+			// ---- checkBox1 ----
+			checkBox1.setText("Take short breaks?");
+			contentPane.add(checkBox1);
+			checkBox1.setBounds(new Rectangle(new Point(120, 250), checkBox1
+					.getPreferredSize()));
+
+			// ---- checkBox2 ----
+			// checkBox2.setText("Chop nearest?");
+			// contentPane.add(checkBox2);
+			// checkBox2.setBounds(new Rectangle(new Point(120, 270),
+			// checkBox1.getPreferredSize()));
+
+			// ---- button2 ----
+			button2.setText("Start");
+			button2.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					button2ActionPerformed(e);
+				}
+			});
+			contentPane.add(button2);
+			button2.setBounds(175, 325, 175, 38);
+
+			/*
+			 * /---- button3 ---- button3.setText("Choose Again");
+			 * button3.addActionListener(new ActionListener() { public void
+			 * actionPerformed(ActionEvent e) { button2ActionPerformed(e); } });
+			 * contentPane.add(button3); button3.setBounds(85, 325, 130, 38);
+			 */
+			// ---- button4 ----
+			button4.setText("Exit");
+			button4.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					button2ActionPerformed(e);
+				}
+			});
+			contentPane.add(button4);
+			button4.setBounds(0, 325, 85, 38);
+
+			{ // compute preferred size
+				Dimension preferredSize = new Dimension();
+				for (int i = 0; i < contentPane.getComponentCount(); i++) {
+					Rectangle bounds = contentPane.getComponent(i).getBounds();
+					preferredSize.width = Math.max(bounds.x + bounds.width,
+							preferredSize.width);
+					preferredSize.height = Math.max(bounds.y + bounds.height,
+							preferredSize.height);
+				}
+				Insets insets = contentPane.getInsets();
+				preferredSize.width += insets.right;
+				preferredSize.height += insets.bottom;
+				contentPane.setMinimumSize(preferredSize);
+				contentPane.setPreferredSize(preferredSize);
+			}
+			pack();
+			setLocationRelativeTo(getOwner());
+
+		}
+
+		private JCheckBox checkBox1;
+		// private JCheckBox checkBox2;
+		private JLabel label1;
+		private JLabel label2;
+		private JLabel label3;
+		private JButton button1;
+		private JComboBox comboBox1;
+		private JLabel label4;
+		private JComboBox comboBox2;
+		private JButton button2;
+		private JButton button4;
+	}
+}
