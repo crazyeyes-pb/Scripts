@@ -113,7 +113,7 @@ public class DebaucherySoulWars extends Script implements MouseListener, Message
 			startedBreak = true;
 			stoppedBreak = false;
 			inClan = false;
-			env.disbleRandoms();
+			env.disableRandoms();
 		} else {
 			env.enableRandoms();
 			startedBreak = false;
